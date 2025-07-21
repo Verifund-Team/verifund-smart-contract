@@ -64,12 +64,13 @@ contract Campaign {
   
   function withdraw() public onlyOwner afterDeadline {
     uint256 balance = address(this).balance;
+    require(amountRaised >= targetAmount, "Target not reached");
     require(balance > 0, "Campaign: No funds to withdraw");
 
     (bool success,) = owner.call{value: balance}("");
     require(success, "Campaign: Fund transfer failed");
 
-    emit Donated(owner, balance);
+    emit Withdraw(owner, balance);
   }
 
   function getRemainingTime() public view returns(uint256) {
@@ -77,6 +78,17 @@ contract Campaign {
       return 0;
     }
     return deadline - block.timestamp;
+  }
+
+  enum campaignStatus {Active, Successful, Failed}
+  function getStatus() public view returns (campaignStatus) {
+    if (block.timestamp < deadline) {
+      return campaignStatus.Active;
+    } else if (amountRaised >= targetAmount) {
+      return campaignStatus.Successful;
+    } else {
+      return campaignStatus.Failed;
+    }
   }
 
   receive() external payable {
