@@ -11,6 +11,8 @@ contract Campaign {
   event Donated(address indexed donor, uint256 amount);
   event Withdraw(address indexed donor, uint256 amount);
 
+  mapping(address => uint256) public donations;
+
   modifier onlyOwner() {
     require(msg.sender == owner, "Campaign: Caller is not the owner");
     _;
@@ -46,7 +48,18 @@ contract Campaign {
   function donate() public payable beforeDeadline {
     require(msg.value > 0, "Campaign: Donation must be greater than zero");
     amountRaised += msg.value;
+    donations[msg.sender] += msg.value;
     emit Donated(msg.sender, msg.value);
+  }
+
+  function refund() public afterDeadline {
+    require(amountRaised < targetAmount, "Target was met");
+    uint256 donatedAmount = donations[msg.sender];
+    require(donatedAmount > 0, "No donations to refund");
+
+    donations[msg.sender] = 0;
+    (bool success, ) = msg.sender.call{value: donatedAmount}("");
+    require(success, "Refund failed"); 
   }
   
   function withdraw() public onlyOwner afterDeadline {
@@ -59,4 +72,14 @@ contract Campaign {
     emit Donated(owner, balance);
   }
 
+  function getRemainingTime() public view returns(uint256) {
+    if(block.timestamp >= deadline) {
+      return 0;
+    }
+    return deadline - block.timestamp;
+  }
+
+  receive() external payable {
+      donate();
+  }
 }
