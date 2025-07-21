@@ -9,6 +9,7 @@ contract Campaign {
   string public ipfsHash; 
 
   event Donated(address indexed donor, uint256 amount);
+  event Withdraw(address indexed donor, uint256 amount);
 
   modifier onlyOwner() {
     require(msg.sender == owner, "Campaign: Caller is not the owner");
@@ -48,4 +49,14 @@ contract Campaign {
     emit Donated(msg.sender, msg.value);
   }
   
+  function withdraw() public onlyOwner afterDeadline {
+    uint256 balance = address(this).balance;
+    require(balance > 0, "Campaign: No funds to withdraw");
+
+    (bool success,) = owner.call{value: balance}("");
+    require(success, "Campaign: Fund transfer failed");
+
+    emit Donated(owner, balance);
+  }
+
 }
