@@ -1,10 +1,15 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 import "./Campaign.sol";
 
 contract CampaignFactory {
     address[] public deployedCampaigns;
+    address public immutable idrxTokenAddress;
+
+    constructor(address _idrxTokenAddress) {
+        require(_idrxTokenAddress != address(0), "Invalid IDRX token address");
+        idrxTokenAddress = _idrxTokenAddress;
+    }
 
     event CampaignCreated(
         address indexed campaignAddress,
@@ -19,9 +24,12 @@ contract CampaignFactory {
         string memory _name,
         uint256 _targetAmount,
         uint256 _durationInDays,
-        string memory _ipfsHash,
-        address _tokenAddress
+        string memory _ipfsHash
     ) public {
+        require(_targetAmount > 0, "Target must be greater than zero");
+        require(_durationInDays > 0, "Duration must be greater than zero");
+        require(bytes(_ipfsHash).length > 0, "IPFS hash required");
+        
         uint256 deadline = block.timestamp + (_durationInDays * 1 days);
 
         Campaign newCampaign = new Campaign(
@@ -30,7 +38,7 @@ contract CampaignFactory {
             _targetAmount,
             deadline,
             _ipfsHash,
-            _tokenAddress
+            idrxTokenAddress
         );
 
         deployedCampaigns.push(address(newCampaign));
@@ -45,7 +53,7 @@ contract CampaignFactory {
         );
     }
 
-    function getDeployedCampaign() public view returns (address[] memory) {
+    function getDeployedCampaigns() public view returns (address[] memory) {
         return deployedCampaigns;
     }
 }
