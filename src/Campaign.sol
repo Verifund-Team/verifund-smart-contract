@@ -3,6 +3,16 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Campaign {
+  enum CampaignCategory {
+        Pendidikan, // value = 0
+        Kesehatan,  // value = 1
+        Lingkungan, // value = 2
+        BencanaAlam,// value = 3
+        Sosial,     // value = 4
+        Lainnya     // value = 5
+    }
+
+
   address public owner;
   string public name;
   uint256 public targetAmount;
@@ -10,6 +20,7 @@ contract Campaign {
   uint256 public amountRaised;
   string public ipfsHash; 
 
+  CampaignCategory public immutable category;
   IERC20 public token;
   mapping(address => uint256) public donations;
 
@@ -39,7 +50,8 @@ contract Campaign {
     uint256 _targetAmount,
     uint256 _deadline,
     string memory _ipfsHash,
-    address _tokenAddress
+    address _tokenAddress,
+    CampaignCategory _category
   ) {
     require(_owner != address(0), "Campaign: Owner cannot be the zero address");
     require(_deadline > block.timestamp, "Campaign: Deadline must be in the future");
@@ -51,6 +63,7 @@ contract Campaign {
     deadline = _deadline;
     ipfsHash = _ipfsHash;
     token = IERC20(_tokenAddress);
+    category = _category;
   }
 
   function donate(uint256 _amount) public payable beforeDeadline {
@@ -67,17 +80,17 @@ contract Campaign {
   }
 
   function withdraw() public onlyOwner afterDeadline {
-    require(amountRaised >= targetAmount, "Target not reached");
+      require(amountRaised >= targetAmount, "Target not reached");
 
-    uint256 balance = address(this).balance;
-    require(balance > 0, "Campaign: No funds to withdraw");
+      uint256 tokenBalance = token.balanceOf(address(this));
+      require(tokenBalance > 0, "Campaign: No funds to withdraw");
 
-    require(
-      token.transfer(owner, token.balanceOf(address(this))),
-      "Campaign: Token transfer to owner failed"
-    );
+      require(
+          token.transfer(owner, tokenBalance),
+          "Campaign: Token transfer to owner failed"
+      );
 
-    emit Withdraw(owner, balance);
+      emit Withdraw(owner, tokenBalance);
   }
 
   function refund() public afterDeadline {
