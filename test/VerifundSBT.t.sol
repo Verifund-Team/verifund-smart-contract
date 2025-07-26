@@ -24,7 +24,6 @@ contract VerifundSBTTest is Test {
     }
 
     function test_TokenURIAfterClaim() public {
-        // Give permission and claim
         verifundSBT.beriIzinMint(user1);
         vm.prank(user1);
         verifundSBT.klaimLencanaSaya();
@@ -37,7 +36,6 @@ contract VerifundSBTTest is Test {
     }
 
     function test_GetBadgeInfo() public {
-        // Before whitelist
         (bool hasPermission, bool isVerified, uint256 tokenId, string memory uri) = 
             verifundSBT.getBadgeInfo(user1);
         
@@ -45,7 +43,6 @@ contract VerifundSBTTest is Test {
         assertFalse(isVerified);
         assertEq(uri, "");
         
-        // After whitelist
         verifundSBT.beriIzinMint(user1);
         (hasPermission, isVerified, tokenId, uri) = verifundSBT.getBadgeInfo(user1);
         
@@ -53,7 +50,6 @@ contract VerifundSBTTest is Test {
         assertFalse(isVerified);
         assertEq(uri, "");
         
-        // After claim
         vm.prank(user1);
         verifundSBT.klaimLencanaSaya();
         (hasPermission, isVerified, tokenId, uri) = verifundSBT.getBadgeInfo(user1);
@@ -71,7 +67,6 @@ contract VerifundSBTTest is Test {
         
         verifundSBT.setBaseURI(newURI);
         
-        // Test dengan claim token baru
         verifundSBT.beriIzinMint(user1);
         vm.prank(user1);
         verifundSBT.klaimLencanaSaya();

@@ -42,7 +42,6 @@ contract VerifundSBT is ERC721, Ownable {
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_ownerOf(tokenId) != address(0), "Verifund: Token tidak exists");
         
-        // Return langsung ke metadata IPFS hash
         return _baseTokenURI;
     }
     
@@ -82,7 +81,6 @@ contract VerifundSBT is ERC721, Ownable {
         isWhitelisted[_user] = false;
     }
     
-    // Fungsi untuk mendapatkan info lengkap badge
     function getBadgeInfo(address _user) external view returns (
         bool hasWhitelistPermission,
         bool isCurrentlyVerified,

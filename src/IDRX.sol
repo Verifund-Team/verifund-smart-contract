@@ -14,17 +14,14 @@ contract IDRX is ERC20 {
         return _decimals;
     }
     
-    // Mint any amount without restrictions
     function mint(uint256 amount) public {
         _mint(msg.sender, amount);
     }
     
-    // Quick mint 10,000 IDRX
     function mint10k() public {
         _mint(msg.sender, 10000 * 10**_decimals);
     }
     
-    // Mint to specific address
     function mintTo(address to, uint256 amount) public {
         _mint(to, amount);
     }
