@@ -198,7 +198,7 @@ await campaign.donate(donationAmount);
 #### Claim Verification Badge
 ```javascript
 const sbt = new ethers.Contract(SBT_ADDRESS, sbtAbi, signer);
-await sbt.claimMyBadge();
+await sbt.klaimLencanaSaya();
 ```
 
 ## 🔐 Security Considerations
