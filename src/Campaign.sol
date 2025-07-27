@@ -17,6 +17,7 @@ contract Campaign {
     event Donated(address indexed donor, uint256 amount);
     event Withdrawn(address indexed owner, uint256 amount);
     event Refunded(address indexed donor, uint256 amount);
+    event IDRXDonationSynced(uint256 amount);
     
     modifier onlyOwner() {
         require(msg.sender == owner, "Campaign: Caller is not the owner");
@@ -67,25 +68,37 @@ contract Campaign {
         emit Donated(msg.sender, _amount);
     }
     
+    function syncIDRXDonations() external {
+        uint256 currentBalance = token.balanceOf(address(this));
+        
+        if (currentBalance > amountRaised) {
+            uint256 unrecordedAmount = currentBalance - amountRaised;
+            amountRaised += unrecordedAmount;
+            
+            emit IDRXDonationSynced(unrecordedAmount);
+        }
+    }
+    
     function withdraw() external onlyOwner afterDeadline {
-        require(amountRaised >= targetAmount, "Campaign: Target not reached");
+        uint256 actualBalance = token.balanceOf(address(this));
+        require(actualBalance >= targetAmount, "Campaign: Target not reached");
         require(!isWithdrawn, "Campaign: Funds already withdrawn");
         
         isWithdrawn = true;
         
-        uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "Campaign: No funds to withdraw");
+        require(actualBalance > 0, "Campaign: No funds to withdraw");
         
         require(
-            token.transfer(owner, balance),
+            token.transfer(owner, actualBalance),
             "Campaign: Token transfer to owner failed"
         );
         
-        emit Withdrawn(owner, balance);
+        emit Withdrawn(owner, actualBalance);
     }
     
     function refund() external afterDeadline {
-        require(amountRaised < targetAmount, "Campaign: Target was met");
+        uint256 actualBalance = token.balanceOf(address(this));
+        require(actualBalance < targetAmount, "Campaign: Target was met");
         require(!isWithdrawn, "Campaign: Owner already withdrew");
         
         uint256 donatedAmount = donations[msg.sender];
@@ -110,13 +123,17 @@ contract Campaign {
     }
     
     enum CampaignStatus {Active, Successful, Failed}
+    
     function getStatus() public view returns (CampaignStatus) {
         if (block.timestamp < deadline) {
             return CampaignStatus.Active;
-        } else if (amountRaised >= targetAmount) {
-            return CampaignStatus.Successful;
         } else {
-            return CampaignStatus.Failed;
+            uint256 actualBalance = token.balanceOf(address(this));
+            if (actualBalance >= targetAmount) {
+                return CampaignStatus.Successful;
+            } else {
+                return CampaignStatus.Failed;
+            }
         }
     }
     
@@ -125,6 +142,7 @@ contract Campaign {
         string memory campaignName,
         uint256 target,
         uint256 raised,
+        uint256 actualBalance,
         uint256 timeRemaining,
         CampaignStatus status
     ) {
@@ -133,6 +151,7 @@ contract Campaign {
             name,
             targetAmount,
             amountRaised,
+            token.balanceOf(address(this)),
             getRemainingTime(),
             getStatus()
         );
