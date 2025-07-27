@@ -23,6 +23,8 @@ The project consists of 4 main smart contracts:
   - Automatic refund system if the target is not achieved
   - Campaign metadata is stored on IPFS
   - Status tracking (Active, Successful, Failed)
+  - IDRX donation synchronization for external transfers
+  - Comprehensive campaign information retrieval
 
 ### 3. **CampaignFactory** (`src/CampaignFactory.sol`)
 - **Function**: Factory contract to create new campaigns
@@ -128,7 +130,7 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 ### Lisk Sepolia Testnet
 - **IDRX Token**: `0x31c0C6e0F048d259Cd8597e1e3594F842555b235`
 - **VerifundSBT**: `0x388878A2e2c404a2567c070a4C39D9A75EFFeb61`
-- **CampaignFactory**: `0x758D14d98B9d929AF61A2A16463369de3c9a936A`
+- **CampaignFactory**: `0xe76B8a9a512288F91e717d49a72d66e53Cefee41`
 
 ## 🔄 Platform Workflow
 
@@ -193,6 +195,23 @@ await idrx.approve(CAMPAIGN_ADDRESS, donationAmount);
 
 // Donate
 await campaign.donate(donationAmount);
+```
+
+#### Sync External IDRX Donations
+```javascript
+const campaign = new ethers.Contract(CAMPAIGN_ADDRESS, campaignAbi, signer);
+
+// Sync donations that were sent directly to campaign contract
+await campaign.syncIDRXDonations();
+```
+
+#### Get Campaign Information
+```javascript
+const campaign = new ethers.Contract(CAMPAIGN_ADDRESS, campaignAbi, signer);
+
+// Get comprehensive campaign info
+const [owner, name, target, raised, actualBalance, timeRemaining, status] = 
+    await campaign.getCampaignInfo();
 ```
 
 #### Claim Verification Badge
