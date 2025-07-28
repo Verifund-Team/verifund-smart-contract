@@ -132,6 +132,11 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 - **VerifundSBT**: `0x388878A2e2c404a2567c070a4C39D9A75EFFeb61`
 - **CampaignFactory**: `0xe76B8a9a512288F91e717d49a72d66e53Cefee41`
 
+### Lisk Mainnet
+- **IDRX Token**: `coming soon..`
+- **VerifundSBT**: `coming soon..`
+- **CampaignFactory**: `coming soon..`
+
 ## 🔄 Platform Workflow
 
 ### 1. Initial Setup
@@ -159,10 +164,9 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 
 This project uses Foundry for testing. Test files are available in the `test/` folder:
 
-- `CampaignFactory.t.sol` - Test untuk factory contract
-- `VerifundSBT.t.sol` - Test untuk SBT verification
-- `IDRX.t.sol` - Test untuk IDRX token
-- `Counter.t.sol` - Template test
+- `CampaignFactory.t.sol` - Test for factory contract
+- `VerifundSBT.t.sol` - Test for SBT verification
+- `IDRX.t.sol` - Test for IDRX token
 
 ### Run Specific Test
 ```bash
