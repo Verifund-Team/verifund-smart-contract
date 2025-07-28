@@ -34,7 +34,6 @@ The project consists of 4 main smart contracts:
   - Deploy new campaigns with customizable parameters
   - Track all created campaigns
   - Event logging for monitoring
-  - **Integrated verification system**: Requires VerifundSBT address for campaign deployment
   - Automatic linking of campaigns with verification contract
 
 ### 4. **VerifundSBT** (`src/VerifundSBT.sol`)
@@ -140,7 +139,7 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 - **CampaignFactory**: `0xfFe6484Fde362E1beB4AbE5917a565637701Ef63`
 
 ### Lisk Mainnet
-- **IDRX Token**: `...`
+- **IDRX Token**: `0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22` (Official IDRX)
 - **VerifundSBT**: `...`
 - **CampaignFactory**: `...`
 
