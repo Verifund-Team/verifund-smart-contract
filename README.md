@@ -22,9 +22,11 @@ The project consists of 4 main smart contracts:
   - Configurable target amount and deadline
   - Automatic refund system if the target is not achieved
   - Campaign metadata is stored on IPFS
-  - Status tracking (Active, Successful, Failed)
+  - Status tracking (Active, Successful, Failed, VerifiedWithdrawable)
   - IDRX donation synchronization for external transfers
   - Comprehensive campaign information retrieval
+  - **Verification-based withdrawal**: Verified owners can withdraw funds even if target not reached
+  - Integration with VerifundSBT for owner verification status
 
 ### 3. **CampaignFactory** (`src/CampaignFactory.sol`)
 - **Function**: Factory contract to create new campaigns
@@ -32,6 +34,8 @@ The project consists of 4 main smart contracts:
   - Deploy new campaigns with customizable parameters
   - Track all created campaigns
   - Event logging for monitoring
+  - **Integrated verification system**: Requires VerifundSBT address for campaign deployment
+  - Automatic linking of campaigns with verification contract
 
 ### 4. **VerifundSBT** (`src/VerifundSBT.sol`)
 - **Function**: Soulbound Token (Non-transferable NFT) for user verification
@@ -66,6 +70,8 @@ Create a `.env` file in the root directory:
 ```bash
 PRIVATE_KEY=your_private_key_here
 ETHERSCAN_KEY=your_etherscan_api_key
+IDRX_TOKEN_ADDRESS=deployed_idrx_token_address
+VERIFUND_SBT_ADDRESS=deployed_verifund_sbt_address
 ```
 
 ## 🔧 Development Commands
@@ -116,6 +122,7 @@ forge script script/DeployVerifundSBT.s.sol:DeployVerifundSBT --rpc-url http://l
 
 4. **Deploy CampaignFactory**
 ```bash
+# Make sure IDRX_TOKEN_ADDRESS and VERIFUND_SBT_ADDRESS are set in .env
 forge script script/DeployCampaignFactory.s.sol:DeployCampaignFactory --rpc-url http://localhost:8545 --private-key <your_private_key> --broadcast
 ```
 
@@ -130,19 +137,20 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 ### Lisk Sepolia Testnet
 - **IDRX Token**: `0x31c0C6e0F048d259Cd8597e1e3594F842555b235`
 - **VerifundSBT**: `0x388878A2e2c404a2567c070a4C39D9A75EFFeb61`
-- **CampaignFactory**: `0xe76B8a9a512288F91e717d49a72d66e53Cefee41`
+- **CampaignFactory**: `0xfFe6484Fde362E1beB4AbE5917a565637701Ef63`
 
 ### Lisk Mainnet
-- **IDRX Token**: `coming soon..`
-- **VerifundSBT**: `coming soon..`
-- **CampaignFactory**: `coming soon..`
+- **IDRX Token**: `...`
+- **VerifundSBT**: `...`
+- **CampaignFactory**: `...`
 
 ## 🔄 Platform Workflow
 
 ### 1. Initial Setup
 1. Deploy IDRX token
 2. Deploy VerifundSBT with base URI metadata
-3. Deploy CampaignFactory with IDRX token address
+3. Deploy CampaignFactory with both IDRX token address and VerifundSBT address
+4. Set environment variables with deployed contract addresses
 
 ### 2. User Verification
 1. Admin adds address to VerifundSBT whitelist
@@ -157,8 +165,11 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 ### 4. Donation & Withdrawal
 1. Donor approves IDRX to campaign contract
 2. Donor calls `donate()` function with IDRX amount
-3. If target achieved: Owner can withdraw after deadline
-4. If target not achieved: Donor can refund after deadline
+3. **Withdrawal conditions after deadline**:
+   - If target achieved: Owner can withdraw
+   - If target not achieved BUT owner is verified: Owner can still withdraw
+   - If target not achieved AND owner not verified: Donors can request refunds
+4. **Refund conditions**: Available only when target not reached AND owner not verified
 
 ## 🧪 Testing
 
@@ -187,6 +198,8 @@ const tx = await campaignFactory.createCampaign(
     2592000, // 30 days duration in seconds (30 * 24 * 60 * 60)
     "QmHash..." // IPFS hash
 );
+
+// Note: CampaignFactory automatically integrates with VerifundSBT for verification
 ```
 
 #### Donate to Campaign
@@ -216,6 +229,10 @@ const campaign = new ethers.Contract(CAMPAIGN_ADDRESS, campaignAbi, signer);
 // Get comprehensive campaign info
 const [owner, name, target, raised, actualBalance, timeRemaining, status] = 
     await campaign.getCampaignInfo();
+
+// Check campaign status (now includes VerifiedWithdrawable)
+// Status: 0=Active, 1=Successful, 2=Failed, 3=VerifiedWithdrawable
+const status = await campaign.getStatus();
 ```
 
 #### Claim Verification Badge
@@ -231,12 +248,16 @@ await sbt.klaimLencanaSaya();
 3. **Reentrancy**: Uses checks-effects-interactions pattern
 4. **Token Safety**: Uses OpenZeppelin standard contracts
 5. **Non-transferable**: SBT cannot be transferred to maintain verification integrity
+6. **Verification Integration**: Campaign withdrawal logic integrates with SBT verification status
+7. **Dual Withdrawal Logic**: Protects both verified and unverified campaign owners appropriately
 
 ## 🛣️ Roadmap
 
 - [x] Basic crowdfunding functionality
 - [x] SBT verification system
 - [x] IPFS metadata integration
+- [x] **Verification-based withdrawal system**
+- [x] **Enhanced campaign status tracking**
 - [ ] Multi-signature campaign approval
 - [ ] Milestone-based fund release
 - [ ] Governance token integration
