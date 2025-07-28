@@ -23,14 +23,14 @@ contract CampaignFactory {
     function createCampaign(
         string memory _name,
         uint256 _targetAmount,
-        uint256 _durationInDays,
+        uint256 _durationInSeconds,
         string memory _ipfsHash
     ) public {
         require(_targetAmount > 0, "Target must be greater than zero");
-        require(_durationInDays > 0, "Duration must be greater than zero");
+        require(_durationInSeconds > 0, "Duration must be greater than zero");
         require(bytes(_ipfsHash).length > 0, "IPFS hash required");
         
-        uint256 deadline = block.timestamp + (_durationInDays * 1 days);
+        uint256 deadline = block.timestamp + _durationInSeconds;
 
         Campaign newCampaign = new Campaign(
             msg.sender,
