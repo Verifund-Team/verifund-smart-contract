@@ -2,6 +2,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+interface IVerifundSBT {
+    function isVerified(address _user) external view returns (bool);
+}
+
 contract Campaign {
     address public immutable owner;
     string public name;
@@ -9,6 +13,7 @@ contract Campaign {
     uint256 public immutable deadline;
     string public ipfsHash;
     IERC20 public immutable token;
+    IVerifundSBT public immutable verifundSBT;
     
     uint256 public amountRaised;
     bool public isWithdrawn;
@@ -40,11 +45,13 @@ contract Campaign {
         uint256 _targetAmount,
         uint256 _deadline,
         string memory _ipfsHash,
-        address _tokenAddress
+        address _tokenAddress,
+        address _verifundSBTAddress
     ) {
         require(_owner != address(0), "Campaign: Owner cannot be the zero address");
         require(_deadline > block.timestamp, "Campaign: Deadline must be in the future");
         require(_tokenAddress != address(0), "Campaign: Invalid token address");
+        require(_verifundSBTAddress != address(0), "Campaign: Invalid VerifundSBT address");
         require(_targetAmount > 0, "Campaign: Target must be greater than zero");
         
         owner = _owner;
@@ -53,6 +60,7 @@ contract Campaign {
         deadline = _deadline;
         ipfsHash = _ipfsHash;
         token = IERC20(_tokenAddress);
+        verifundSBT = IVerifundSBT(_verifundSBTAddress);
     }
     
     function donate(uint256 _amount) external beforeDeadline {
@@ -81,12 +89,18 @@ contract Campaign {
     
     function withdraw() external onlyOwner afterDeadline {
         uint256 actualBalance = token.balanceOf(address(this));
-        require(actualBalance >= targetAmount, "Campaign: Target not reached");
         require(!isWithdrawn, "Campaign: Funds already withdrawn");
+        require(actualBalance > 0, "Campaign: No funds to withdraw");
+        
+        bool targetReached = actualBalance >= targetAmount;
+        bool ownerVerified = verifundSBT.isVerified(owner);
+        
+        require(
+            targetReached || ownerVerified, 
+            "Campaign: Target not reached and owner not verified"
+        );
         
         isWithdrawn = true;
-        
-        require(actualBalance > 0, "Campaign: No funds to withdraw");
         
         require(
             token.transfer(owner, actualBalance),
@@ -98,7 +112,11 @@ contract Campaign {
     
     function refund() external afterDeadline {
         uint256 actualBalance = token.balanceOf(address(this));
-        require(actualBalance < targetAmount, "Campaign: Target was met");
+        bool targetReached = actualBalance >= targetAmount;
+        bool ownerVerified = verifundSBT.isVerified(owner);
+        
+        require(!targetReached, "Campaign: Target was met");
+        require(!ownerVerified, "Campaign: Owner is verified and can withdraw");
         require(!isWithdrawn, "Campaign: Owner already withdrew");
         
         uint256 donatedAmount = donations[msg.sender];
@@ -122,7 +140,7 @@ contract Campaign {
         return deadline - block.timestamp;
     }
     
-    enum CampaignStatus {Active, Successful, Failed}
+    enum CampaignStatus {Active, Successful, Failed, VerifiedWithdrawable}
     
     function getStatus() public view returns (CampaignStatus) {
         if (block.timestamp < deadline) {
@@ -132,7 +150,12 @@ contract Campaign {
             if (actualBalance >= targetAmount) {
                 return CampaignStatus.Successful;
             } else {
-                return CampaignStatus.Failed;
+                bool ownerVerified = verifundSBT.isVerified(owner);
+                if (ownerVerified) {
+                    return CampaignStatus.VerifiedWithdrawable;
+                } else {
+                    return CampaignStatus.Failed;
+                }
             }
         }
     }

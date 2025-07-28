@@ -5,10 +5,13 @@ import "./Campaign.sol";
 contract CampaignFactory {
     address[] public deployedCampaigns;
     address public immutable idrxTokenAddress;
+    address public immutable verifundSBTAddress;
 
-    constructor(address _idrxTokenAddress) {
+    constructor(address _idrxTokenAddress, address _verifundSBTAddress) {
         require(_idrxTokenAddress != address(0), "Invalid IDRX token address");
+        require(_verifundSBTAddress != address(0), "Invalid VerifundSBT address");
         idrxTokenAddress = _idrxTokenAddress;
+        verifundSBTAddress = _verifundSBTAddress;
     }
 
     event CampaignCreated(
@@ -38,7 +41,8 @@ contract CampaignFactory {
             _targetAmount,
             deadline,
             _ipfsHash,
-            idrxTokenAddress
+            idrxTokenAddress,
+            verifundSBTAddress
         );
 
         deployedCampaigns.push(address(newCampaign));
