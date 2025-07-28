@@ -184,7 +184,7 @@ const campaignFactory = new ethers.Contract(FACTORY_ADDRESS, factoryAbi, signer)
 const tx = await campaignFactory.createCampaign(
     "Campaign Name",
     ethers.parseUnits("1000", 2), // Target 1000 IDRX
-    30, // 30 days duration
+    2592000, // 30 days duration in seconds (30 * 24 * 60 * 60)
     "QmHash..." // IPFS hash
 );
 ```
