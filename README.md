@@ -65,11 +65,12 @@ forge install
 ```
 
 3. **Setup environment variables**
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory (you can copy from `.env.example`):
 ```bash
 PRIVATE_KEY=your_private_key_here
 ETHERSCAN_KEY=your_etherscan_api_key
 IDRX_TOKEN_ADDRESS=deployed_idrx_token_address
+CAMPAIGN_FACTORY_ADDRESS=deployed_campaign_factory_address
 VERIFUND_SBT_ADDRESS=deployed_verifund_sbt_address
 ```
 
