@@ -136,7 +136,7 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 ### Lisk Sepolia Testnet
 - **IDRX Token**: `0x31c0C6e0F048d259Cd8597e1e3594F842555b235`
 - **VerifundSBT**: `0x388878A2e2c404a2567c070a4C39D9A75EFFeb61`
-- **CampaignFactory**: `0xfFe6484Fde362E1beB4AbE5917a565637701Ef63`
+- **CampaignFactory**: `0xBE5e9943D03e35EaaA917bD36E5327C01feC7Cd1`
 
 ### Lisk Mainnet
 - **IDRX Token**: `0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22` (Official IDRX)

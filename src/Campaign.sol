@@ -16,13 +16,16 @@ contract Campaign {
     IVerifundSBT public immutable verifundSBT;
     
     uint256 public amountRaised;
+    uint256 public peakBalance;
     bool public isWithdrawn;
+    bool public peakBalanceUpdated;
     mapping(address => uint256) public donations;
     
     event Donated(address indexed donor, uint256 amount);
     event Withdrawn(address indexed owner, uint256 amount);
     event Refunded(address indexed donor, uint256 amount);
     event IDRXDonationSynced(uint256 amount);
+    event PeakBalanceUpdated(uint256 peakBalance);
     
     modifier onlyOwner() {
         require(msg.sender == owner, "Campaign: Caller is not the owner");
@@ -87,10 +90,31 @@ contract Campaign {
         }
     }
     
+    function updatePeakBalance() external onlyOwner {
+        require(!isWithdrawn, "Campaign: Funds already withdrawn");
+        require(!peakBalanceUpdated, "Campaign: Peak balance already updated");
+        
+        uint256 currentBalance = token.balanceOf(address(this));
+        peakBalance = currentBalance;
+        peakBalanceUpdated = true;
+        
+        emit PeakBalanceUpdated(peakBalance);
+    }
+    
     function withdraw() external onlyOwner afterDeadline {
         uint256 actualBalance = token.balanceOf(address(this));
         require(!isWithdrawn, "Campaign: Funds already withdrawn");
         require(actualBalance > 0, "Campaign: No funds to withdraw");
+        
+        if (actualBalance > amountRaised) {
+            require(peakBalanceUpdated, "Campaign: Must update peak balance before withdrawal due to external transfers");
+        } else {
+            if (!peakBalanceUpdated) {
+                peakBalance = actualBalance;
+                peakBalanceUpdated = true;
+                emit PeakBalanceUpdated(peakBalance);
+            }
+        }
         
         bool targetReached = actualBalance >= targetAmount;
         bool ownerVerified = verifundSBT.isVerified(owner);
@@ -169,14 +193,30 @@ contract Campaign {
         uint256 timeRemaining,
         CampaignStatus status
     ) {
+        uint256 displayBalance;
+        
+        if (isWithdrawn && peakBalanceUpdated) {
+            displayBalance = peakBalance;
+        } else {
+            displayBalance = token.balanceOf(address(this));
+        }
+        
         return (
             owner,
             name,
             targetAmount,
             amountRaised,
-            token.balanceOf(address(this)),
+            displayBalance,
             getRemainingTime(),
             getStatus()
         );
+    }
+    
+    function getPeakBalance() external view returns (uint256) {
+        return peakBalance;
+    }
+    
+    function isPeakBalanceUpdated() external view returns (bool) {
+        return peakBalanceUpdated;
     }
 }
