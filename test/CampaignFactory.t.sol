@@ -8,11 +8,13 @@ import {Campaign} from "../src/Campaign.sol";
 contract CampaignFactoryTest is Test {
     CampaignFactory public factory;
     address public idrxTokenAddress;
+    address public verifundSBTAddress;
 
     function setUp() public {
         idrxTokenAddress = vm.envAddress("IDRX_TOKEN_ADDRESS");
+        verifundSBTAddress = vm.envAddress("VERIFUND_SBT_ADDRESS");
 
-        factory = new CampaignFactory(idrxTokenAddress);
+        factory = new CampaignFactory(idrxTokenAddress, verifundSBTAddress);
     }
 
     function test_CreateCampaignWithRealIDRX() public {
