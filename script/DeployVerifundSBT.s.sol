@@ -6,19 +6,19 @@ import {VerifundSBT} from "../src/VerifundSBT.sol";
 contract DeployVerifundSBT is Script {
     function run() external returns (VerifundSBT) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        
+
         string memory baseURI = "https://ipfs.io/ipfs/QmS4eWSdpaCT6MWXu6Mf7wB5gnJpw8AkQA21bA1gUtMaA1";
-        
+
         vm.startBroadcast(deployerPrivateKey);
-        
+
         VerifundSBT verifundSBT = new VerifundSBT(baseURI);
-        
+
         vm.stopBroadcast();
-        
+
         console.log("VerifundSBT deployed to:", address(verifundSBT));
         console.log("Owner:", verifundSBT.owner());
         console.log("Base URI:", baseURI);
-        
+
         return verifundSBT;
     }
 }

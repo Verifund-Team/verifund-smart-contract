@@ -20,7 +20,7 @@ contract CampaignFactory {
         string name,
         uint256 targetAmount,
         uint256 deadline,
-        string ipfsHash 
+        string ipfsHash
     );
 
     function createCampaign(
@@ -32,29 +32,15 @@ contract CampaignFactory {
         require(_targetAmount > 0, "Target must be greater than zero");
         require(_durationInSeconds > 0, "Duration must be greater than zero");
         require(bytes(_ipfsHash).length > 0, "IPFS hash required");
-        
+
         uint256 deadline = block.timestamp + _durationInSeconds;
 
-        Campaign newCampaign = new Campaign(
-            msg.sender,
-            _name,
-            _targetAmount,
-            deadline,
-            _ipfsHash,
-            idrxTokenAddress,
-            verifundSBTAddress
-        );
+        Campaign newCampaign =
+            new Campaign(msg.sender, _name, _targetAmount, deadline, _ipfsHash, idrxTokenAddress, verifundSBTAddress);
 
         deployedCampaigns.push(address(newCampaign));
 
-        emit CampaignCreated(
-            address(newCampaign),
-            msg.sender,
-            _name,
-            _targetAmount,
-            deadline,
-            _ipfsHash
-        );
+        emit CampaignCreated(address(newCampaign), msg.sender, _name, _targetAmount, deadline, _ipfsHash);
     }
 
     function getDeployedCampaigns() public view returns (address[] memory) {
