@@ -7,7 +7,7 @@ contract DeployVerifundSBT is Script {
     function run() external returns (VerifundSBT) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
-        string memory baseURI = "https://ipfs.io/ipfs/QmS4eWSdpaCT6MWXu6Mf7wB5gnJpw8AkQA21bA1gUtMaA1";
+        string memory baseURI = "https://ipfs.io/ipfs/QmV4bJuAVn5eDSkviiGBEa8ZST3sLkwRBmg6jKtQa6osdY";
 
         vm.startBroadcast(deployerPrivateKey);
 
