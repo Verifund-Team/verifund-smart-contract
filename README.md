@@ -134,11 +134,6 @@ forge script script/Deploy.s.sol:DeployIDRX --rpc-url lisk_sepolia --private-key
 
 ## 📋 Smart Contract Addresses
 
-### Lisk Sepolia Testnet
-- **IDRX Token**: `0x31c0C6e0F048d259Cd8597e1e3594F842555b235`
-- **VerifundSBT**: `0x388878A2e2c404a2567c070a4C39D9A75EFFeb61`
-- **CampaignFactory**: `0x5fc7BB8359fE43Ad330711708A573b9A502f0534`
-
 ### Lisk Mainnet
 - **IDRX Token**: `0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22` (Official IDRX)
 - **VerifundSBT**: `0x3eb9972beA8f2fDE0C011c77E432f3706078E65E`
